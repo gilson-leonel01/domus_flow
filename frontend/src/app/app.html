@@ -1,0 +1,209 @@
+@if (!user()) {
+<section class="login-shell">
+  <div class="brand-panel">
+    <div class="logo">D</div>
+    <h1>DomusFlow</h1>
+    <p>Planeie, delegue, acompanhe e recompense o trabalho doméstico.</p>
+    <div class="feature">
+      <b>Rotinas claras</b><span>Agenda diária organizada por pessoa e horário.</span>
+    </div>
+    <div class="feature">
+      <b>Progresso mensurável</b><span>XP por desempenho dentro do tempo estimado.</span>
+    </div>
+  </div>
+  <form class="login-card" (ngSubmit)="login()">
+    <span class="eyebrow">ACESSO À CASA</span>
+    <h2>Bem-vinda</h2>
+    <p>Entre com um perfil de demonstração.</p>
+    <label>E-mail<input type="email" [(ngModel)]="loginData.email" name="email" /></label
+    ><label
+      >Palavra-passe<input
+        type="password"
+        [(ngModel)]="loginData.password"
+        name="password" /></label
+    >@if(error()){
+    <div class="alert error">{{error()}}</div>
+    }<button class="primary" [disabled]="busy()">{{busy()?'A entrar...':'Entrar'}}</button>
+  </form>
+</section>
+} @else {
+<div class="app-shell">
+  <header>
+    <div class="brand">
+      <div class="logo">D</div>
+      <div><b>DomusFlow</b><small>Casa da Família Manuel</small></div>
+    </div>
+    <div class="profile">
+      <span class="avatar">{{user()?.avatar||user()?.name?.slice(0,2)}}</span>
+      <div><b>{{user()?.name}}</b><small>{{roleLabel(user()!.role)}}</small></div>
+      <button class="icon" (click)="logout()">Sair</button>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div>
+        <span class="eyebrow">PLANO DOMÉSTICO</span>
+        <h1>Olá, {{user()?.name?.split(' ')?.[0]}}.</h1>
+        <p>
+          {{user()?.role==='OWNER'?'Organize a casa e acompanhe o desempenho da equipa.':'O seu
+          plano de atividades está pronto para hoje.'}}
+        </p>
+      </div>
+      <div class="date-control">
+        <label>Data de trabalho</label
+        ><input type="date" [(ngModel)]="selectedDate" (change)="changeDate()" />
+      </div>
+    </section>
+    @if(error()){
+    <div class="alert error">{{error()}}</div>
+    } @if(notice()){
+    <div class="alert success">{{notice()}}</div>
+    } @if(dashboard().workLocked){
+    <div class="closed"><b>Dia sem expediente</b><span>{{dashboard().lockReason}}</span></div>
+    }
+    <section class="metrics">
+      <article>
+        <span>Tarefas de hoje</span><strong>{{dashboard().total||0}}</strong
+        ><small>{{dashboard().done||0}} concluídas</small>
+      </article>
+      <article>
+        <span>Progresso</span><strong>{{progress()}}%</strong>
+        <div class="bar"><i [style.width.%]="progress()"></i></div>
+      </article>
+      <article>
+        <span>XP do mês</span><strong>{{dashboard().monthXP||0}}</strong
+        ><small>Meta bónus: 1.000 XP</small>
+      </article>
+    </section>
+    @if(user()?.role==='EMPLOYEE' && !dashboard().workLocked){
+    <section class="checkin">
+      <div>
+        <span class="pulse"></span>
+        <div>
+          <b>{{dashboard().checkedIn?'Jornada em andamento':'Pronta para começar?'}}</b
+          ><small
+            >{{dashboard().checkedIn?'As tarefas já podem ser executadas.':'Valide a chegada para
+            desbloquear a agenda.'}}</small
+          >
+        </div>
+      </div>
+      <button
+        [class.secondary]="dashboard().checkedIn"
+        class="primary"
+        (click)="dashboard().checkedIn?checkOut():checkIn()"
+      >
+        {{dashboard().checkedIn?'Terminar jornada':'Validar início'}}
+      </button>
+    </section>
+    }
+    <section class="section-head">
+      <div>
+        <span class="eyebrow">AGENDA</span>
+        <h2>Atividades planeadas</h2>
+      </div>
+      @if(user()?.role==='OWNER'){<button class="primary" (click)="showTaskForm=!showTaskForm">
+        + Nova tarefa</button
+      >}
+    </section>
+    @if(showTaskForm){
+    <form class="task-form" (ngSubmit)="createTask()">
+      <label
+        >Tarefa<input
+          [(ngModel)]="taskForm.title"
+          name="title"
+          required
+          placeholder="Ex.: Organizar a cozinha" /></label
+      ><label
+        >Responsável<select [(ngModel)]="taskForm.assigneeId" name="assignee">
+          <option *ngFor="let u of users()" [value]="u.id">
+            {{u.name}} · {{roleLabel(u.role)}}
+          </option>
+        </select></label
+      ><label>Data<input type="date" [(ngModel)]="taskForm.scheduledDate" name="date" /></label
+      ><label>Hora<input type="time" [(ngModel)]="taskForm.startTime" name="time" /></label
+      ><label
+        >Minutos<input
+          type="number"
+          [(ngModel)]="taskForm.estimatedMinutes"
+          name="minutes"
+          min="1" /></label
+      ><label
+        >Prioridade<select [(ngModel)]="taskForm.priority" name="priority">
+          <option [value]="1">Baixa</option>
+          <option [value]="2">Média</option>
+          <option [value]="3">Alta</option>
+        </select></label
+      ><label class="wide"
+        >Descrição<textarea [(ngModel)]="taskForm.description" name="description"></textarea>
+      </label>
+      <div class="form-actions">
+        <button type="button" class="ghost" (click)="showTaskForm=false">Cancelar</button
+        ><button class="primary">Guardar tarefa</button>
+      </div>
+    </form>
+    }
+    <div class="task-list">
+      @for(t of tasks();track t.id){
+      <article class="task" [class.done]="t.status==='DONE'">
+        <div class="time">{{t.startTime||'—'}}</div>
+        <div class="task-main">
+          <div class="task-top">
+            <h3>{{t.title}}</h3>
+            <span class="status" [attr.data-status]="t.status">{{statusLabel(t.status)}}</span>
+          </div>
+          <p>{{t.description||'Sem instruções adicionais.'}}</p>
+          <div class="meta">
+            <span>◷ {{t.estimatedMinutes}} min</span
+            ><span>● Prioridade {{t.priority===3?'alta':t.priority===2?'média':'baixa'}}</span
+            >@if(user()?.role==='OWNER'){<span>◎ {{t.assignee.name}}</span>}@if(t.xpAwarded){<span
+              class="xp"
+              >+{{t.xpAwarded}} XP</span
+            >}
+          </div>
+        </div>
+        <div class="task-actions">
+          @if(user()?.role!=='OWNER'&&t.status==='PLANNED'){<button
+            class="primary small"
+            [disabled]="user()?.role==='EMPLOYEE'&&!dashboard().checkedIn"
+            (click)="start(t)"
+          >
+            Iniciar</button
+          >}@if(user()?.role!=='OWNER'&&t.status==='IN_PROGRESS'){<button
+            class="primary small"
+            (click)="complete(t)"
+          >
+            Concluir</button
+          >}@if(user()?.role==='OWNER'&&t.status==='PLANNED'){<button
+            class="danger small"
+            (click)="remove(t)"
+          >
+            Eliminar</button
+          >}
+        </div>
+      </article>
+      }@empty{
+      <div class="empty">
+        <b>Nenhuma tarefa para esta data</b><span>O plano diário está livre.</span>
+      </div>
+      }
+    </div>
+    <section class="rewards">
+      <div>
+        <span class="eyebrow">RECOMPENSAS</span>
+        <h2>Desempenho mensal</h2>
+        <p>Ao atingir 1.000 XP é libertado um bónus; com 1.500 XP, um dia de folga.</p>
+      </div>
+      <div class="reward-cards">
+        <article>
+          <b>Bónus mensal</b><span>{{dashboard().monthXP||0}} / 1.000 XP</span>
+          <div class="bar"><i [style.width.%]="Math.min(100,(dashboard().monthXP||0)/10)"></i></div>
+        </article>
+        <article>
+          <b>Dia de folga</b><span>{{dashboard().monthXP||0}} / 1.500 XP</span>
+          <div class="bar"><i [style.width.%]="Math.min(100,(dashboard().monthXP||0)/15)"></i></div>
+        </article>
+      </div>
+    </section>
+  </main>
+</div>
+}
