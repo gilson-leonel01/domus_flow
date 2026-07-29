@@ -1,209 +1,558 @@
 @if (!user()) {
-<section class="login-shell">
-  <div class="brand-panel">
-    <div class="logo">D</div>
-    <h1>DomusFlow</h1>
-    <p>Planeie, delegue, acompanhe e recompense o trabalho doméstico.</p>
-    <div class="feature">
-      <b>Rotinas claras</b><span>Agenda diária organizada por pessoa e horário.</span>
-    </div>
-    <div class="feature">
-      <b>Progresso mensurável</b><span>XP por desempenho dentro do tempo estimado.</span>
-    </div>
-  </div>
-  <form class="login-card" (ngSubmit)="login()">
-    <span class="eyebrow">ACESSO À CASA</span>
-    <h2>Bem-vinda</h2>
-    <p>Entre com um perfil de demonstração.</p>
-    <label>E-mail<input type="email" [(ngModel)]="loginData.email" name="email" /></label
-    ><label
-      >Palavra-passe<input
-        type="password"
-        [(ngModel)]="loginData.password"
-        name="password" /></label
-    >@if(error()){
-    <div class="alert error">{{error()}}</div>
-    }<button class="primary" [disabled]="busy()">{{busy()?'A entrar...':'Entrar'}}</button>
-  </form>
-</section>
-} @else {
-<div class="app-shell">
-  <header>
-    <div class="brand">
-      <div class="logo">D</div>
-      <div><b>DomusFlow</b><small>Casa da Família Manuel</small></div>
-    </div>
-    <div class="profile">
-      <span class="avatar">{{user()?.avatar||user()?.name?.slice(0,2)}}</span>
-      <div><b>{{user()?.name}}</b><small>{{roleLabel(user()!.role)}}</small></div>
-      <button class="icon" (click)="logout()">Sair</button>
-    </div>
-  </header>
-  <main>
-    <section class="hero">
-      <div>
-        <span class="eyebrow">PLANO DOMÉSTICO</span>
-        <h1>Olá, {{user()?.name?.split(' ')?.[0]}}.</h1>
+  <main class="login-page">
+    <section class="login-visual" aria-label="Apresentação do DomusFlow">
+      <img
+        class="login-logo"
+        src="/assets/brand/domusflow_logo_dark.svg"
+        alt="DomusFlow"
+      />
+      <div class="login-copy">
+        <span class="eyebrow light">GESTÃO DOMÉSTICA INTELIGENTE</span>
+        <h1>Uma casa organizada, sem perder o ritmo.</h1>
         <p>
-          {{user()?.role==='OWNER'?'Organize a casa e acompanhe o desempenho da equipa.':'O seu
-          plano de atividades está pronto para hoje.'}}
+          Planeie rotinas, acompanhe o trabalho diário e reconheça o desempenho da família e da
+          equipa num único lugar.
         </p>
       </div>
-      <div class="date-control">
-        <label>Data de trabalho</label
-        ><input type="date" [(ngModel)]="selectedDate" (change)="changeDate()" />
-      </div>
-    </section>
-    @if(error()){
-    <div class="alert error">{{error()}}</div>
-    } @if(notice()){
-    <div class="alert success">{{notice()}}</div>
-    } @if(dashboard().workLocked){
-    <div class="closed"><b>Dia sem expediente</b><span>{{dashboard().lockReason}}</span></div>
-    }
-    <section class="metrics">
-      <article>
-        <span>Tarefas de hoje</span><strong>{{dashboard().total||0}}</strong
-        ><small>{{dashboard().done||0}} concluídas</small>
-      </article>
-      <article>
-        <span>Progresso</span><strong>{{progress()}}%</strong>
-        <div class="bar"><i [style.width.%]="progress()"></i></div>
-      </article>
-      <article>
-        <span>XP do mês</span><strong>{{dashboard().monthXP||0}}</strong
-        ><small>Meta bónus: 1.000 XP</small>
-      </article>
-    </section>
-    @if(user()?.role==='EMPLOYEE' && !dashboard().workLocked){
-    <section class="checkin">
-      <div>
-        <span class="pulse"></span>
-        <div>
-          <b>{{dashboard().checkedIn?'Jornada em andamento':'Pronta para começar?'}}</b
-          ><small
-            >{{dashboard().checkedIn?'As tarefas já podem ser executadas.':'Valide a chegada para
-            desbloquear a agenda.'}}</small
-          >
-        </div>
-      </div>
-      <button
-        [class.secondary]="dashboard().checkedIn"
-        class="primary"
-        (click)="dashboard().checkedIn?checkOut():checkIn()"
-      >
-        {{dashboard().checkedIn?'Terminar jornada':'Validar início'}}
-      </button>
-    </section>
-    }
-    <section class="section-head">
-      <div>
-        <span class="eyebrow">AGENDA</span>
-        <h2>Atividades planeadas</h2>
-      </div>
-      @if(user()?.role==='OWNER'){<button class="primary" (click)="showTaskForm=!showTaskForm">
-        + Nova tarefa</button
-      >}
-    </section>
-    @if(showTaskForm){
-    <form class="task-form" (ngSubmit)="createTask()">
-      <label
-        >Tarefa<input
-          [(ngModel)]="taskForm.title"
-          name="title"
-          required
-          placeholder="Ex.: Organizar a cozinha" /></label
-      ><label
-        >Responsável<select [(ngModel)]="taskForm.assigneeId" name="assignee">
-          <option *ngFor="let u of users()" [value]="u.id">
-            {{u.name}} · {{roleLabel(u.role)}}
-          </option>
-        </select></label
-      ><label>Data<input type="date" [(ngModel)]="taskForm.scheduledDate" name="date" /></label
-      ><label>Hora<input type="time" [(ngModel)]="taskForm.startTime" name="time" /></label
-      ><label
-        >Minutos<input
-          type="number"
-          [(ngModel)]="taskForm.estimatedMinutes"
-          name="minutes"
-          min="1" /></label
-      ><label
-        >Prioridade<select [(ngModel)]="taskForm.priority" name="priority">
-          <option [value]="1">Baixa</option>
-          <option [value]="2">Média</option>
-          <option [value]="3">Alta</option>
-        </select></label
-      ><label class="wide"
-        >Descrição<textarea [(ngModel)]="taskForm.description" name="description"></textarea>
-      </label>
-      <div class="form-actions">
-        <button type="button" class="ghost" (click)="showTaskForm=false">Cancelar</button
-        ><button class="primary">Guardar tarefa</button>
-      </div>
-    </form>
-    }
-    <div class="task-list">
-      @for(t of tasks();track t.id){
-      <article class="task" [class.done]="t.status==='DONE'">
-        <div class="time">{{t.startTime||'—'}}</div>
-        <div class="task-main">
-          <div class="task-top">
-            <h3>{{t.title}}</h3>
-            <span class="status" [attr.data-status]="t.status">{{statusLabel(t.status)}}</span>
-          </div>
-          <p>{{t.description||'Sem instruções adicionais.'}}</p>
-          <div class="meta">
-            <span>◷ {{t.estimatedMinutes}} min</span
-            ><span>● Prioridade {{t.priority===3?'alta':t.priority===2?'média':'baixa'}}</span
-            >@if(user()?.role==='OWNER'){<span>◎ {{t.assignee.name}}</span>}@if(t.xpAwarded){<span
-              class="xp"
-              >+{{t.xpAwarded}} XP</span
-            >}
-          </div>
-        </div>
-        <div class="task-actions">
-          @if(user()?.role!=='OWNER'&&t.status==='PLANNED'){<button
-            class="primary small"
-            [disabled]="user()?.role==='EMPLOYEE'&&!dashboard().checkedIn"
-            (click)="start(t)"
-          >
-            Iniciar</button
-          >}@if(user()?.role!=='OWNER'&&t.status==='IN_PROGRESS'){<button
-            class="primary small"
-            (click)="complete(t)"
-          >
-            Concluir</button
-          >}@if(user()?.role==='OWNER'&&t.status==='PLANNED'){<button
-            class="danger small"
-            (click)="remove(t)"
-          >
-            Eliminar</button
-          >}
-        </div>
-      </article>
-      }@empty{
-      <div class="empty">
-        <b>Nenhuma tarefa para esta data</b><span>O plano diário está livre.</span>
-      </div>
-      }
-    </div>
-    <section class="rewards">
-      <div>
-        <span class="eyebrow">RECOMPENSAS</span>
-        <h2>Desempenho mensal</h2>
-        <p>Ao atingir 1.000 XP é libertado um bónus; com 1.500 XP, um dia de folga.</p>
-      </div>
-      <div class="reward-cards">
+      <div class="feature-grid">
         <article>
-          <b>Bónus mensal</b><span>{{dashboard().monthXP||0}} / 1.000 XP</span>
-          <div class="bar"><i [style.width.%]="Math.min(100,(dashboard().monthXP||0)/10)"></i></div>
+          <span class="feature-icon">01</span>
+          <div>
+            <strong>Agenda partilhada</strong>
+            <p>Tarefas claras, horários definidos e responsáveis visíveis.</p>
+          </div>
         </article>
         <article>
-          <b>Dia de folga</b><span>{{dashboard().monthXP||0}} / 1.500 XP</span>
-          <div class="bar"><i [style.width.%]="Math.min(100,(dashboard().monthXP||0)/15)"></i></div>
+          <span class="feature-icon">02</span>
+          <div>
+            <strong>Progresso real</strong>
+            <p>Jornada, execução, produtividade e recompensas mensuráveis.</p>
+          </div>
         </article>
       </div>
+      <small class="login-footnote">DomusFlow · organização doméstica com propósito</small>
+    </section>
+
+    <section class="login-form-panel">
+      <form class="login-card" (ngSubmit)="login()">
+        <div class="mobile-login-brand">
+          <img src="/assets/brand/domusflow_logo_horizontal.svg" alt="DomusFlow" />
+        </div>
+        <div class="form-heading">
+          <span class="eyebrow">ACESSO À CASA</span>
+          <h2>Bem-vinda de volta</h2>
+          <p>Entre com a sua conta ou use um dos perfis de demonstração.</p>
+        </div>
+
+        <label>
+          <span>E-mail</span>
+          <div class="field-with-icon">
+            <span aria-hidden="true">@</span>
+            <input
+              type="email"
+              [(ngModel)]="loginData.email"
+              name="email"
+              autocomplete="email"
+              placeholder="nome@exemplo.com"
+              required
+            />
+          </div>
+        </label>
+
+        <label>
+          <span>Palavra-passe</span>
+          <div class="field-with-icon password-field">
+            <span aria-hidden="true">••</span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="loginData.password"
+              name="password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="field-action" (click)="showPassword = !showPassword">
+              {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+        </label>
+
+        @if (error()) {
+          <div class="alert error" role="alert">
+            <span aria-hidden="true">!</span>
+            <p>{{ error() }}</p>
+          </div>
+        }
+
+        <button class="button primary login-submit" [disabled]="busy()">
+          <span>{{ busy() ? 'A entrar…' : 'Entrar no DomusFlow' }}</span>
+          <span aria-hidden="true">→</span>
+        </button>
+
+        <div class="demo-access">
+          <div>
+            <strong>Perfis de demonstração</strong>
+            <small>Palavra-passe: Demo123!</small>
+          </div>
+          <div class="demo-buttons">
+            <button type="button" (click)="selectDemo('ana@demo.local')">
+              <span>AM</span>
+              <small>Gestora</small>
+            </button>
+            <button type="button" (click)="selectDemo('rosa@demo.local')">
+              <span>RP</span>
+              <small>Colaboradora</small>
+            </button>
+            <button type="button" (click)="selectDemo('mateus@demo.local')">
+              <span>MM</span>
+              <small>Filho</small>
+            </button>
+          </div>
+        </div>
+      </form>
     </section>
   </main>
-</div>
+} @else {
+  <div class="dashboard-shell">
+    <aside class="sidebar">
+      <a class="sidebar-brand" href="#top" aria-label="DomusFlow — início">
+        <img src="/assets/brand/domusflow_logo_horizontal.svg" alt="DomusFlow" />
+      </a>
+
+      <nav aria-label="Navegação principal">
+        <a class="active" href="#overview">
+          <span class="nav-icon">⌂</span>
+          <span>Visão geral</span>
+        </a>
+        <a href="#agenda">
+          <span class="nav-icon">✓</span>
+          <span>Agenda</span>
+        </a>
+        <a href="#rewards">
+          <span class="nav-icon">◇</span>
+          <span>Recompensas</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-tip">
+        <span>DOMUSFLOW</span>
+        <strong>Rotinas simples. Resultados visíveis.</strong>
+        <p>Uma visão diária para manter todos alinhados.</p>
+      </div>
+
+      <div class="sidebar-profile">
+        <span class="avatar">{{ user()?.avatar || user()?.name?.slice(0, 2) }}</span>
+        <div>
+          <strong>{{ user()?.name }}</strong>
+          <small>{{ roleLabel(user()!.role) }}</small>
+        </div>
+        <button type="button" title="Terminar sessão" aria-label="Terminar sessão" (click)="logout()">
+          ↗
+        </button>
+      </div>
+    </aside>
+
+    <div class="dashboard-content" id="top">
+      <header class="mobile-header">
+        <img src="/assets/brand/domusflow_logo_horizontal.svg" alt="DomusFlow" />
+        <button type="button" class="button ghost compact" (click)="logout()">Sair</button>
+      </header>
+
+      <main class="dashboard-main">
+        <section class="hero" id="overview">
+          <div class="hero-copy">
+            <span class="eyebrow">{{ dateLabel() }}</span>
+            <h1>Olá, {{ firstName() }}.</h1>
+            <p>
+              @if (user()?.role === 'OWNER') {
+                Acompanhe a rotina da casa, distribua responsabilidades e antecipe bloqueios.
+              } @else {
+                A sua agenda está organizada. Conclua cada atividade e acompanhe o seu progresso.
+              }
+            </p>
+          </div>
+          <div class="hero-actions">
+            @if (!notificationEnabled()) {
+              <button type="button" class="button secondary" (click)="enableNotifications()">
+                <span aria-hidden="true">◌</span>
+                Ativar lembretes
+              </button>
+            }
+            <label class="date-picker">
+              <span>Data de trabalho</span>
+              <input type="date" [(ngModel)]="selectedDate" (change)="changeDate()" />
+            </label>
+          </div>
+        </section>
+
+        @if (error()) {
+          <div class="alert error dashboard-alert" role="alert">
+            <span aria-hidden="true">!</span>
+            <p>{{ error() }}</p>
+            <button type="button" aria-label="Fechar aviso" (click)="error.set('')">×</button>
+          </div>
+        }
+        @if (notice()) {
+          <div class="alert success dashboard-alert" role="status">
+            <span aria-hidden="true">✓</span>
+            <p>{{ notice() }}</p>
+          </div>
+        }
+
+        @if (dashboard().workLocked) {
+          <section class="locked-banner">
+            <span class="locked-icon">—</span>
+            <div>
+              <strong>Dia sem expediente</strong>
+              <p>{{ dashboard().lockReason }}</p>
+            </div>
+          </section>
+        }
+
+        <section class="metrics" aria-label="Resumo diário">
+          <article>
+            <div class="metric-top">
+              <span class="metric-icon tasks-icon">✓</span>
+              <span class="trend neutral">{{ dashboard().inProgress }} em curso</span>
+            </div>
+            <strong>{{ dashboard().total }}</strong>
+            <div>
+              <span>Tarefas planeadas</span>
+              <small>{{ dashboard().done }} concluídas nesta data</small>
+            </div>
+          </article>
+          <article>
+            <div class="metric-top">
+              <span class="metric-icon progress-icon">↗</span>
+              <span class="trend positive">{{ progress() }}%</span>
+            </div>
+            <strong>{{ progress() }}%</strong>
+            <div>
+              <span>Progresso diário</span>
+              <small>Conclusão do plano selecionado</small>
+            </div>
+            <div class="progress-bar" aria-label="Progresso diário">
+              <i [style.width.%]="progress()"></i>
+            </div>
+          </article>
+          <article>
+            <div class="metric-top">
+              <span class="metric-icon xp-icon">◇</span>
+              <span class="trend neutral">+{{ dashboard().dayXP }} hoje</span>
+            </div>
+            <strong>{{ dashboard().monthXP }}</strong>
+            <div>
+              <span>XP acumulado</span>
+              <small>Meta de bónus: {{ dashboard().bonusThreshold }} XP</small>
+            </div>
+          </article>
+        </section>
+
+        @if (user()?.role === 'EMPLOYEE' && !dashboard().workLocked && isToday()) {
+          <section class="work-session" [class.active]="dashboard().checkedIn">
+            <div class="session-status">
+              <span class="session-dot"></span>
+              <div>
+                <strong>{{ dashboard().checkedIn ? 'Jornada em andamento' : 'Pronta para começar?' }}</strong>
+                <p>
+                  {{
+                    dashboard().checkedIn
+                      ? 'A agenda está desbloqueada e pronta para execução.'
+                      : 'Valide a sua chegada antes de iniciar as tarefas de hoje.'
+                  }}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="button session-button"
+              [disabled]="actionBusy() === 'check-in' || actionBusy() === 'check-out'"
+              (click)="dashboard().checkedIn ? checkOut() : checkIn()"
+            >
+              {{ dashboard().checkedIn ? 'Terminar jornada' : 'Validar início' }}
+            </button>
+          </section>
+        }
+
+        <section class="agenda-section" id="agenda">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">AGENDA</span>
+              <h2>Atividades planeadas</h2>
+              <p>{{ tasks().length }} atividade(s) para {{ dateLabel() }}.</p>
+            </div>
+            @if (user()?.role === 'OWNER') {
+              <button type="button" class="button primary" (click)="openCreateTask()">
+                <span aria-hidden="true">+</span>
+                Nova tarefa
+              </button>
+            }
+          </div>
+
+          <div class="agenda-toolbar">
+            <label class="search-field">
+              <span aria-hidden="true">⌕</span>
+              <input
+                type="search"
+                [ngModel]="searchTerm()"
+                (ngModelChange)="searchTerm.set($event)"
+                placeholder="Pesquisar tarefa ou responsável"
+                aria-label="Pesquisar tarefas"
+              />
+            </label>
+            <label class="filter-field">
+              <span>Estado</span>
+              <select
+                [ngModel]="statusFilter()"
+                (ngModelChange)="statusFilter.set($event)"
+                aria-label="Filtrar por estado"
+              >
+                <option value="ALL">Todos</option>
+                <option value="PLANNED">Planeadas</option>
+                <option value="IN_PROGRESS">Em curso</option>
+                <option value="DONE">Concluídas</option>
+              </select>
+            </label>
+          </div>
+
+          @if (showTaskForm) {
+            <form class="task-form" (ngSubmit)="saveTask()">
+              <div class="form-title">
+                <div>
+                  <span class="eyebrow">{{ editingTaskId ? 'EDITAR TAREFA' : 'NOVA TAREFA' }}</span>
+                  <h3>{{ editingTaskId ? 'Atualizar atividade' : 'Adicionar atividade ao plano' }}</h3>
+                </div>
+                <button type="button" class="close-button" aria-label="Fechar" (click)="closeTaskForm()">
+                  ×
+                </button>
+              </div>
+
+              <label class="field span-2">
+                <span>Título da tarefa</span>
+                <input
+                  [(ngModel)]="taskForm.title"
+                  name="title"
+                  maxlength="140"
+                  required
+                  placeholder="Ex.: Organizar a cozinha"
+                />
+              </label>
+              <label class="field">
+                <span>Responsável</span>
+                <select [(ngModel)]="taskForm.assigneeId" name="assignee" required>
+                  @for (member of users(); track member.id) {
+                    <option [value]="member.id">
+                      {{ member.name }} · {{ roleLabel(member.role) }}
+                    </option>
+                  }
+                </select>
+              </label>
+              <label class="field">
+                <span>Data</span>
+                <input type="date" [(ngModel)]="taskForm.scheduledDate" name="date" required />
+              </label>
+              <label class="field">
+                <span>Hora</span>
+                <input type="time" [(ngModel)]="taskForm.startTime" name="time" />
+              </label>
+              <label class="field">
+                <span>Duração estimada</span>
+                <div class="suffix-field">
+                  <input
+                    type="number"
+                    [(ngModel)]="taskForm.estimatedMinutes"
+                    name="minutes"
+                    min="1"
+                    max="1440"
+                    required
+                  />
+                  <span>min</span>
+                </div>
+              </label>
+              <label class="field">
+                <span>Prioridade</span>
+                <select [(ngModel)]="taskForm.priority" name="priority">
+                  <option [ngValue]="1">Baixa</option>
+                  <option [ngValue]="2">Média</option>
+                  <option [ngValue]="3">Alta</option>
+                </select>
+              </label>
+              <label class="field span-full">
+                <span>Descrição</span>
+                <textarea
+                  [(ngModel)]="taskForm.description"
+                  name="description"
+                  rows="3"
+                  maxlength="800"
+                  placeholder="Adicione instruções úteis para a execução."
+                ></textarea>
+              </label>
+              <div class="form-actions span-full">
+                <button type="button" class="button ghost" (click)="closeTaskForm()">Cancelar</button>
+                <button class="button primary" [disabled]="actionBusy() === 'task-form'">
+                  {{ actionBusy() === 'task-form' ? 'A guardar…' : editingTaskId ? 'Guardar alterações' : 'Criar tarefa' }}
+                </button>
+              </div>
+            </form>
+          }
+
+          <div class="task-list" [class.loading]="busy()">
+            @for (task of visibleTasks(); track task.id) {
+              <article class="task-card" [attr.data-status]="task.status">
+                <div class="task-time">
+                  <strong>{{ task.startTime || '—' }}</strong>
+                  <small>{{ task.estimatedMinutes }} min</small>
+                </div>
+                <div class="task-body">
+                  <div class="task-title-row">
+                    <div>
+                      <span class="priority-dot" [attr.data-priority]="task.priority"></span>
+                      <h3>{{ task.title }}</h3>
+                    </div>
+                    <span class="status-pill" [attr.data-status]="task.status">
+                      {{ statusLabel(task.status) }}
+                    </span>
+                  </div>
+                  <p>{{ task.description || 'Sem instruções adicionais.' }}</p>
+                  <div class="task-meta">
+                    <span><b>{{ priorityLabel(task.priority) }}</b> prioridade</span>
+                    @if (user()?.role === 'OWNER') {
+                      <span class="assignee-chip">
+                        <i>{{ task.assignee.avatar || task.assignee.name.slice(0, 2) }}</i>
+                        {{ task.assignee.name }}
+                      </span>
+                    }
+                    @if (task.xpAwarded) {
+                      <span class="xp-chip">+{{ task.xpAwarded }} XP</span>
+                    }
+                  </div>
+                </div>
+                <div class="task-actions">
+                  @if (user()?.role !== 'OWNER' && task.status === 'PLANNED') {
+                    <button
+                      type="button"
+                      class="button primary compact"
+                      [disabled]="
+                        !isToday() ||
+                        (user()?.role === 'EMPLOYEE' && !dashboard().checkedIn) ||
+                        actionBusy() === 'start-' + task.id
+                      "
+                      (click)="start(task)"
+                    >
+                      Iniciar
+                    </button>
+                  }
+                  @if (user()?.role !== 'OWNER' && task.status === 'IN_PROGRESS') {
+                    <button
+                      type="button"
+                      class="button primary compact"
+                      [disabled]="actionBusy() === 'complete-' + task.id"
+                      (click)="complete(task)"
+                    >
+                      Concluir
+                    </button>
+                  }
+                  @if (user()?.role === 'OWNER' && task.status === 'PLANNED') {
+                    <button type="button" class="icon-button" aria-label="Editar tarefa" (click)="editTask(task)">
+                      ✎
+                    </button>
+                    <button
+                      type="button"
+                      class="icon-button danger"
+                      aria-label="Eliminar tarefa"
+                      [disabled]="actionBusy() === 'delete-' + task.id"
+                      (click)="remove(task)"
+                    >
+                      ×
+                    </button>
+                  }
+                </div>
+              </article>
+            } @empty {
+              <div class="empty-state">
+                <img src="/assets/brand/domusflow_icon.svg" alt="" />
+                <strong>Nenhuma atividade encontrada</strong>
+                <p>
+                  {{
+                    tasks().length
+                      ? 'Ajuste a pesquisa ou o filtro para ver outras tarefas.'
+                      : 'O plano desta data está livre.'
+                  }}
+                </p>
+                @if (user()?.role === 'OWNER' && !tasks().length) {
+                  <button type="button" class="button secondary" (click)="openCreateTask()">
+                    Criar primeira tarefa
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="rewards-section" id="rewards">
+          <div class="rewards-copy">
+            <span class="eyebrow light">RECOMPENSAS</span>
+            <h2>Consistência que gera reconhecimento.</h2>
+            <p>
+              O XP é calculado pela conclusão e pelo tempo de execução. Acompanhe o avanço mensal
+              até cada benefício.
+            </p>
+            <div class="month-xp">
+              <span>XP do mês</span>
+              <strong>{{ dashboard().monthXP }}</strong>
+            </div>
+          </div>
+
+          <div class="reward-grid">
+            <article>
+              <div class="reward-head">
+                <span class="reward-icon">◇</span>
+                <span class="reward-status" [class.available]="availableReward('BONUS')">
+                  {{ availableReward('BONUS') ? 'Disponível' : rewardProgress('BONUS') + '%' }}
+                </span>
+              </div>
+              <h3>Bónus mensal</h3>
+              <p>{{ dashboard().monthXP }} de {{ dashboard().bonusThreshold }} XP</p>
+              <div class="progress-bar reward-progress">
+                <i [style.width.%]="rewardProgress('BONUS')"></i>
+              </div>
+              @if (availableReward('BONUS'); as reward) {
+                <button
+                  type="button"
+                  class="button primary compact full"
+                  [disabled]="actionBusy() === 'reward-' + reward.id"
+                  (click)="claimReward(reward)"
+                >
+                  Solicitar bónus
+                </button>
+              }
+            </article>
+
+            <article>
+              <div class="reward-head">
+                <span class="reward-icon">☼</span>
+                <span class="reward-status" [class.available]="availableReward('DAY_OFF')">
+                  {{ availableReward('DAY_OFF') ? 'Disponível' : rewardProgress('DAY_OFF') + '%' }}
+                </span>
+              </div>
+              <h3>Dia de folga</h3>
+              <p>{{ dashboard().monthXP }} de {{ dashboard().dayOffThreshold }} XP</p>
+              <div class="progress-bar reward-progress">
+                <i [style.width.%]="rewardProgress('DAY_OFF')"></i>
+              </div>
+              @if (availableReward('DAY_OFF'); as reward) {
+                <button
+                  type="button"
+                  class="button primary compact full"
+                  [disabled]="actionBusy() === 'reward-' + reward.id"
+                  (click)="claimReward(reward)"
+                >
+                  Solicitar folga
+                </button>
+              }
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
 }

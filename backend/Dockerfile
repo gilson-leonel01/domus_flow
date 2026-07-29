@@ -1,23 +1,24 @@
-FROM golang:1.23-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+WORKDIR /src
 
-WORKDIR /app
-
-COPY go.mod ./
-RUN go mod download
+COPY DomusFlow.Api.csproj ./
+RUN dotnet restore DomusFlow.Api.csproj
 
 COPY . .
-RUN go mod tidy && CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /domusflow ./cmd/api
+RUN dotnet publish DomusFlow.Api.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
-FROM alpine:3.21
-
-RUN adduser -D app
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
 WORKDIR /app
+RUN apk add --no-cache icu-libs tzdata \
+    && addgroup -S app \
+    && adduser -S app -G app
 
-COPY --from=build /domusflow /usr/local/bin/domusflow
+COPY --from=build /app/publish .
 COPY migrations ./migrations
 
-USER app
-
+ENV ASPNETCORE_URLS=http://+:8080 \
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+    PORT=8080
 EXPOSE 8080
-
-CMD ["domusflow"]
+USER app
+ENTRYPOINT ["dotnet", "DomusFlow.Api.dll"]

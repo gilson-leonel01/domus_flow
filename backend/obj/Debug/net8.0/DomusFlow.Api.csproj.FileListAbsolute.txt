@@ -1,0 +1,7 @@
+/home/developer/Downloads/domusflow_aspnet/backend/obj/Debug/net8.0/DomusFlow.Api.csproj.AssemblyReference.cache
+/home/developer/Downloads/domusflow_aspnet/backend/obj/Debug/net8.0/rpswa.dswa.cache.json
+/home/developer/Downloads/domusflow_aspnet/backend/obj/Debug/net8.0/DomusFlow.Api.GeneratedMSBuildEditorConfig.editorconfig
+/home/developer/Downloads/domusflow_aspnet/backend/obj/Debug/net8.0/DomusFlow.Api.AssemblyInfoInputs.cache
+/home/developer/Downloads/domusflow_aspnet/backend/obj/Debug/net8.0/DomusFlow.Api.AssemblyInfo.cs
+/home/developer/Downloads/domusflow_aspnet/backend/obj/Debug/net8.0/DomusFlow.Api.csproj.CoreCompileInputs.cache
+/home/developer/Downloads/domusflow_aspnet/backend/obj/Debug/net8.0/DomusFlow.Api.MvcApplicationPartsAssemblyInfo.cache

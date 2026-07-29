@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="220" fill="#D8FA63"/>
+  <!-- D monogram -->
+  <path d="M250 244H420C604 244 730 348 730 512C730 676 604 780 420 780H250Z"
+        fill="none" stroke="#174E3C" stroke-width="118" stroke-linejoin="round"/>
+  <path d="M250 244V780" stroke="#174E3C" stroke-width="118" stroke-linecap="round"/>
+  <!-- Flow cuts integrated into the D -->
+  <path d="M508 384C574 398 616 438 632 492" fill="none" stroke="#D8FA63" stroke-width="34" stroke-linecap="round"/>
+  <path d="M518 474C562 486 590 510 602 542" fill="none" stroke="#D8FA63" stroke-width="30" stroke-linecap="round"/>
+  <path d="M516 560C548 570 568 586 578 608" fill="none" stroke="#D8FA63" stroke-width="26" stroke-linecap="round"/>
+</svg>

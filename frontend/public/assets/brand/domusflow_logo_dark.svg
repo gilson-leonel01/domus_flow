@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="620" viewBox="0 0 2200 620">
+  <rect width="2200" height="620" fill="#174E3C"/>
+  <g transform="translate(40 40)">
+    <rect width="540" height="540" rx="116" fill="#D8FA63"/>
+    <path d="M132 128H220C318 128 385 183 385 270C385 357 318 412 220 412H132Z"
+          fill="none" stroke="#174E3C" stroke-width="62" stroke-linejoin="round"/>
+    <path d="M132 128V412" stroke="#174E3C" stroke-width="62" stroke-linecap="round"/>
+    <path d="M266 202C302 209 325 231 334 260" fill="none" stroke="#D8FA63" stroke-width="18" stroke-linecap="round"/>
+    <path d="M272 250C296 256 312 269 319 286" fill="none" stroke="#D8FA63" stroke-width="16" stroke-linecap="round"/>
+    <path d="M271 296C288 301 299 310 304 322" fill="none" stroke="#D8FA63" stroke-width="14" stroke-linecap="round"/>
+  </g>
+  <text x="650" y="374" font-family="DejaVu Sans, Arial, sans-serif" font-size="270" font-weight="800" letter-spacing="-12" fill="#FFFFFF">DomusFlow</text>
+  <path d="M1510 435C1690 497 1888 486 2065 408" fill="none" stroke="#D8FA63" stroke-width="24" stroke-linecap="round"/>
+</svg>

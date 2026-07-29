@@ -6,33 +6,34 @@ services:
       POSTGRES_USER: domusflow
       POSTGRES_PASSWORD: domusflow
     volumes:
-      - domusflow_pgdata:/var/lib/postgresql/data
+      - domusflow_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U domusflow -d domusflow"]
       interval: 5s
       timeout: 5s
-      retries: 10
-    restart: unless-stopped
+      retries: 12
 
   api:
-    build: ./backend
+    build:
+      context: ./backend
     environment:
       DATABASE_URL: postgres://domusflow:domusflow@db:5432/domusflow?sslmode=disable
-      JWT_SECRET: local-development-secret-change-in-production
-      PORT: "8080"
-      TZ: Africa/Luanda
+      JWT_SECRET: domusflow-development-secret-change-in-production-2026
+      APP_TIMEZONE: Africa/Luanda
+      PORT: 8080
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
 
   web:
-    build: ./frontend
+    build:
+      context: ./frontend
     ports:
-      - "4200:80"
+      - "8080:80"
     depends_on:
       - api
     restart: unless-stopped
 
 volumes:
-  domusflow_pgdata:
+  domusflow_data:
