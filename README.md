@@ -53,18 +53,6 @@ npm start
 
 O Angular inicia em `http://localhost:4200` e encaminha `/api` para o backend local através de `proxy.conf.json`.
 
-## Principais alterações
-
-- Backend Go substituído por ASP.NET Core, mantendo os mesmos endpoints e respostas JSON.
-- Autenticação JWT e autorização por funções `OWNER`, `EMPLOYEE` e `CHILD`.
-- Migrações e dados de demonstração preservados em PostgreSQL.
-- Datas operacionais normalizadas para `Africa/Luanda`.
-- Validação de tarefas, feriados, jornada e recompensas reforçada.
-- Interface Angular redesenhada com navegação lateral, métricas, pesquisa, filtros e estados responsivos.
-- Criação, edição e eliminação de tarefas no painel da gestora.
-- Recompensas ligadas aos limites configurados pela API.
-- Notificações ativadas apenas mediante ação explícita do utilizador.
-
 ## Endpoints principais
 
 - `POST /api/auth/login`
